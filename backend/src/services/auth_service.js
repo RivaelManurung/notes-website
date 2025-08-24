@@ -11,7 +11,7 @@ exports.registerUser = async (password, username) => {
     user.password = undefined;
     return user;
   } catch (error) {
-    throw new Error("Error registering user");
+    throw new Error(error.message || "Gagal mendaftar pengguna");
   }
 };
 
@@ -31,6 +31,6 @@ exports.loginUser = async (username, password) => {
     });
     return { user, token };
   } catch (error) {
-    throw new Error("Error logging in User");
+    throw new Error(error.message || "Gagal masuk pengguna");
   }
 };
