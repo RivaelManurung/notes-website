@@ -3,16 +3,16 @@ services:
   api:
     build: .
     ports:
-      - "5000:5000"
+      - "5001:5000" # <-- Perbaiki di sini. API akan diakses di http://localhost:5001
     volumes:
       - .:/app
       - /app/node_modules
     environment:
       - PG_DATABASE=notesdb
       - PG_USER=postgres
-      - PG_PASSWORD=your_password
+      - PG_PASSWORD=12345
       - PG_HOST=postgres
-      - JWT_SECRET=RahasiaSuperAmanAnda
+      - JWT_SECRET=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
     depends_on:
       - postgres
   
@@ -22,9 +22,9 @@ services:
     environment:
       POSTGRES_DB: notesdb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_password
+      POSTGRES_PASSWORD: 12345
     ports:
-      - "5432:5432"
+      - "5432:5432" # <-- Port standar untuk PostgreSQL
     volumes:
       - postgres-data:/var/lib/postgresql/data
 

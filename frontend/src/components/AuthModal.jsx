@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Edit3, Eye, EyeOff } from "lucide-react";
+import { registerUser, loginUser } from "../services/notesApi";
 
 const AuthModal = ({ handleAuth }) => {
   const [authMode, setAuthMode] = useState("login");
@@ -10,9 +11,39 @@ const AuthModal = ({ handleAuth }) => {
     name: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleAuth(formData);
+    try {
+      let response;
+      if (authMode === "register") {
+        // Pendaftaran
+        response = await registerUser(formData);
+        alert(response.data.message); // Menampilkan pesan sukses dari backend
+        setAuthMode("login"); // Arahkan ke form login
+      } else {
+        // Login
+        response = await loginUser(formData);
+
+        // Destrukturisasi data yang diterima dari backend
+        const { token, userId, name } = response.data;
+
+        // Simpan data di localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("notesUser", JSON.stringify({ name, userId }));
+
+        // Kirim data pengguna yang berhasil login ke App.js
+        handleAuth({ name, userId });
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Otentikasi gagal!");
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   return (
@@ -55,33 +86,30 @@ const AuthModal = ({ handleAuth }) => {
           {authMode === "register" && (
             <input
               type="text"
+              name="name"
               placeholder="Nama Lengkap"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={handleInputChange}
               className="w-full px-5 py-3 bg-neutral-100 border-2 border-transparent rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-300 placeholder:text-neutral-400 font-medium"
               required
             />
           )}
           <input
             type="email"
+            name="email"
             placeholder="Email"
             value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
+            onChange={handleInputChange}
             className="w-full px-5 py-3 bg-neutral-100 border-2 border-transparent rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-300 placeholder:text-neutral-400 font-medium"
             required
           />
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
+              name="password"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              onChange={handleInputChange}
               className="w-full px-5 py-3 pr-14 bg-neutral-100 border-2 border-transparent rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-300 placeholder:text-neutral-400 font-medium"
               required
             />

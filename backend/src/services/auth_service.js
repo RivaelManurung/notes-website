@@ -1,36 +1,28 @@
-exports.registerUser = async (password, username) => {
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+// backend/services/authService.js
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-    const user = await User.create({
-      username: username,
-      password: hashedPassword,
-    });
-
-    user.password = undefined;
-    return user;
-  } catch (error) {
-    throw new Error(error.message || "Gagal mendaftar pengguna");
-  }
+exports.registerUser = async (name, email, password) => {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+        throw new Error('Email sudah digunakan.');
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const newUser = await User.create({ name, email, password: hashedPassword });
+    newUser.password = undefined;
+    return newUser;
 };
 
-exports.loginUser = async (username, password) => {
-  try {
-    const user = await User.findOne({ where: { username } });
+exports.loginUser = async (email, password) => {
+    const user = await User.findOne({ where: { email } });
     if (!user) {
-      throw new Error("User not exist");
+        throw new Error('User tidak ditemukan.');
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error("Password is incorrect");
+        throw new Error('Password salah.');
     }
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-    return { user, token };
-  } catch (error) {
-    throw new Error(error.message || "Gagal masuk pengguna");
-  }
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return { token, userId: user.id, name: user.name };
 };
