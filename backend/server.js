@@ -14,15 +14,14 @@ app.use(express.json());
 // Hubungkan ke database dan sinkronkan model
 connectDB();
 sequelize
-  .sync({ force: true }) // <-- Pastikan flag ini ada
-  .then(() => {
-    console.log("Model berhasil disinkronkan dengan database.");
-  })
-  .catch((err) => {
-    console.error("Gagal menyinkronkan model:", err);
-  });
+  .sync() // <-- Hapus {force:true} jika sudah berhasil
+  .then(() => {
+    console.log("Model berhasil disinkronkan dengan database.");
+  })
+  .catch((err) => {
+    console.error("Gagal menyinkronkan model:", err);
+  });
 
-// Import Routes
 // Import Routes
 const authRoutes = require("./src/routes/auth_routes");
 const noteRoutes = require("./src/routes/notes_routes");
@@ -34,5 +33,5 @@ app.use("/api/notes", noteRoutes);
 app.use("/api/export", exportRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
+  console.log(`Server is running on port: ${PORT}`);
 });
